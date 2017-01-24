@@ -14,7 +14,7 @@ $ linkcheck -root https://adhocteam.us/
 Installation
 ------------
 
-Requires [Go][https://golang.org/] to be installed.
+Requires [Go](https://golang.org/) to be installed.
 
 ``` shell
 $ go get github.com/adhocteam.us/linkcheck
@@ -23,4 +23,4 @@ $ go get github.com/adhocteam.us/linkcheck
 License
 -------
 
-See [COPYING][./COPYING].
+See [COPYING](./COPYING).
