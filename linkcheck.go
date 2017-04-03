@@ -217,6 +217,10 @@ func doCrawl(url string) error {
 		if *verbose {
 			log.Printf("Len of %s: %d", url, len(slurp))
 		}
+		if ct := http.DetectContentType(slurp); !strings.HasPrefix(ct, "text/html") {
+			log.Printf("Skipping %s, content-type %s", url, ct)
+			return nil
+		}
 		body := string(slurp)
 		for _, ref := range getLinks(body) {
 			if *verbose {
