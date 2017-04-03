@@ -75,6 +75,7 @@ func href(n *html.Node) string {
 var invalidProtos = []string{
 	"mailto:",
 	"javascript:",
+	"tel:",
 }
 
 func excludeLink(ref string) bool {
