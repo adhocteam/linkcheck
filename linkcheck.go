@@ -10,6 +10,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"flag"
 	"fmt"
@@ -192,6 +193,9 @@ func doCrawl(url string) error {
 	if err != nil {
 		return err
 	}
+
+	defer res.Body.Close()
+
 	// Handle redirects.
 	if res.StatusCode/100 == 3 {
 		newURL, err := res.Location()
@@ -210,17 +214,27 @@ func doCrawl(url string) error {
 	}
 	// Don't recurse through external links -- just check them once
 	if strings.HasPrefix(url, *root) {
-		slurp, err := ioutil.ReadAll(res.Body)
-		res.Body.Close()
+
+		buf := bufio.NewReader(res.Body)
+		// http.DetectContentType only uses first 512 bytes
+		peek, err := buf.Peek(512)
+		if err != nil {
+			log.Fatalf("Error initially reading %s body: %v", url, err)
+		}
+
+		if ct := http.DetectContentType(peek); !strings.HasPrefix(ct, "text/html") {
+			if *verbose {
+				log.Printf("Skipping %s, content-type %s", url, ct)
+			}
+			return nil
+		}
+
+		slurp, err := ioutil.ReadAll(buf)
 		if err != nil {
 			log.Fatalf("Error reading %s body: %v", url, err)
 		}
 		if *verbose {
 			log.Printf("Len of %s: %d", url, len(slurp))
-		}
-		if ct := http.DetectContentType(slurp); !strings.HasPrefix(ct, "text/html") {
-			log.Printf("Skipping %s, content-type %s", url, ct)
-			return nil
 		}
 		body := string(slurp)
 		for _, ref := range getLinks(body) {
