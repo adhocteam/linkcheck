@@ -11,9 +11,12 @@ RUN /bin/bash -c 'gem install fpm'
 ARG git_access_token
 ARG git_user_name
 RUN /bin/bash -c 'git clone https://$git_user_name:$git_access_token@github.com/adhocteam/linkcheck'
-RUN /bin/bash -c 'cd linkcheck; GOPATH="/projects/src GOBIN="/projects/bin /usr/local/go/bin/go get .; GOPATH="/projects/src GOBIN="/projects/bin /usr/local/go/bin/go build'
-
-RUN /bin/bash -c 'cd linkcheck; fpm -n linkcheck -v 1 -s dir -t rpm -a x86_64 --prefix /bin/ -p linkcheck-latest.rpm linkcheck'
-
+ENV GOPATH="/projects/src"
+ENV GOBIN="/projects/bin /usr/local/go/bin/go"
+ENV PATH="/usr/local/go/bin:${PATH}"
 WORKDIR /linkcheck
+RUN /bin/bash -c 'go get .'
+RUN /bin/bash -c 'go build'
+RUN /bin/bash -c 'fpm -n linkcheck -v 1 -s dir -t rpm -a x86_64 --prefix /bin/ -p linkcheck-latest.rpm linkcheck'
+
 ENTRYPOINT /bin/bash
